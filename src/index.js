@@ -11,8 +11,14 @@ const jwtSecret="BA45BL5U456"
 const app=express();
 const port=process.env.PORT || 3000
 app.use(express.json());
-app.get("user",authToken,(req,res)=>{
-   const{user,pass}= req.query
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    next();
+  });
+app.get("user",(req,res)=>{
+   res.send("Hello world")
 });
 app.get("user",authToken,)
 app.post("/signup",async(req,res)=>{
