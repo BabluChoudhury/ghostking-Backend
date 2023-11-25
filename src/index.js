@@ -7,24 +7,44 @@ import {Msg} from './Model/user.js'
 import {Service} from './Model/user.js'
 import { authToken } from "./middleware/auth.js";
 import './middleware/auth.js'
+import cors from 'cors'
 const jwtSecret="BA45BL5U456"
 const app=express();
 const port=process.env.PORT || 3000
 app.use(express.json());
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    next();
-  });
-app.get("user",(req,res)=>{
-   res.send("Hello world")
+// app.use((req, res, next) => {
+//     res.header('Access-Control-Allow-Origin', '*');
+//     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+//     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+//     next();
+//   });
+
+app.use(cors({
+  origin: 'http://localhost:4200',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,  // This allows cookies and headers with credentials
+  optionsSuccessStatus: 204,
+  allowedHeaders: 'Authorization,Content-Type',  // Include any other headers you are using
+}));
+
+app.get("/user",authToken,async(req,res)=>{
+    const id=req.user.user.id
+    const result=await User.findOne({_id:id})
+    if(!result){
+        return res.status(404).json({ errors: [{ msg: 'Invalid token' }] });
+    }
+res.status(200).send(result)
+
 });
-app.get("user",authToken,)
+
 app.post("/signup",async(req,res)=>{
     try{
         const{name,email,username,password} =req.body
-        const hpass= await bcrypt.hash(password,10);
+        if(name== undefined||name== null||name==  "" &email== undefined||email== null||email==  ""&username== undefined||username== null||username==  "" &password== undefined||password== null||password==  "" ){
+            res.status(400).send({message:"Bed Request"})
+        }
+        else{
+            const hpass= await bcrypt.hash(password,10);
         const result=User({
             FullName:name,
             Email:email,
@@ -32,7 +52,7 @@ app.post("/signup",async(req,res)=>{
             password:hpass
         });
         const insertData= result.save();
-        res.status(201).json({ message: 'Signup Successfully' });
+        // res.status(201).json({ message: 'Signup Successfully' });
 
         const payload = {
             user: {
@@ -42,7 +62,9 @@ app.post("/signup",async(req,res)=>{
         jwt.sign(payload,jwtSecret,{expiresIn:'1h'},(err,token)=>{
             if(err) throw err
             res.status(201).send({token})
+            // res.cookie("jwt-Token",token).status(201).json({message:"signup successfully"})
         })
+        }
     }catch(e){
         
         res.status(404).json({ message:"An error occurred during Signup"});
@@ -51,7 +73,11 @@ app.post("/signup",async(req,res)=>{
 app.post("/login",async(req,res)=>{
     try{
         const {username,password} =req.body;
-        const result=await User.findOne({username})
+        if(username== undefined||username== null||username==  "" &password== undefined||password== null||password==  ""){
+            res.status(400).send({message:"Bed Request"})
+        }
+        else{
+            const result=await User.findOne({username})
         if(!result){
             return res.status(401).json({ errors: [{ msg: 'Invalid credentials' }] });
         }
@@ -66,8 +92,10 @@ app.post("/login",async(req,res)=>{
         };
         jwt.sign(payload, jwtSecret,{expiresIn:'1h'},(err,token)=>{
             if(err) throw err;
+            // res.cookie("jwt-Token",token,{maxAge:100000});
             res.status(201).send({token})
         })
+        }
     }catch(e){
         res.status(404).json({ message:"An error occurred during login"});
     }
