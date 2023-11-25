@@ -20,7 +20,7 @@ app.use((req, res, next) => {
 });
 
 app.use(cors({
-    origin: 'http://localhost:4200',
+    origin: 'https://www.ghostking.space/',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,  // This allows cookies and headers with credentials
     optionsSuccessStatus: 204,
