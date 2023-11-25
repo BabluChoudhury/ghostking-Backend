@@ -7,7 +7,7 @@ import {Msg} from './Model/user.js'
 import {Service} from './Model/user.js'
 import { authToken } from "./middleware/auth.js";
 import './middleware/auth.js'
-// import cors from 'cors'
+import cors from 'cors'
 const jwtSecret="BA45BL5U456"
 const app=express();
 const port=process.env.PORT || 3000
@@ -19,13 +19,13 @@ app.use((req, res, next) => {
     next();
   });
 
-// app.use(cors({
-//   origin: 'http://localhost:4200',
-//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-//   credentials: true,  // This allows cookies and headers with credentials
-//   optionsSuccessStatus: 204,
-//   allowedHeaders: 'Authorization,Content-Type',  // Include any other headers you are using
-// }));
+app.use(cors({
+  origin: 'http://localhost:4200',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,  // This allows cookies and headers with credentials
+  optionsSuccessStatus: 204,
+  allowedHeaders: 'Authorization,Content-Type',  // Include any other headers you are using
+}));
 
 app.get("/user",authToken,async(req,res)=>{
     const id=req.user.user.id
